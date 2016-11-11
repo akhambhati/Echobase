@@ -1,2 +1,2 @@
 # Echobase
-Default codebase for physiology and network analysis
+Codebase for network neuroscience analysis
