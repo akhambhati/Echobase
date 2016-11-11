@@ -24,8 +24,8 @@ def check_dims(arr, nd):
             Number of dimensions to check against
     '''
 
-    if not arr.ndims == nd:
-        raise Exception('%r has %r dimensions. Must have %r' % (arr, arr.ndims, nd))
+    if not arr.ndim == nd:
+        raise Exception('%r has %r dimensions. Must have %r' % (arr, arr.ndim, nd))
 
 
 def check_type(obj, typ):
