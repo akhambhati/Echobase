@@ -65,3 +65,46 @@ def broadband_conn(data, fs):
     adj = correlation.xcorr_mag(data_hat, fs, **param['XCorr'])
 
     return adj
+
+
+def multiband_conn(data, fs):
+    """
+    Pipeline function for computing a band-specific functional network from ECoG.
+
+    See: Khambhati, A. N. et al. (2016).
+    Virtual Cortical Resection Reveals Push-Pull Network Control
+    Preceding Seizure Evolution. Neuron, 91(5).
+
+    Data --> CAR Filter --> Multi-taper Coherence
+
+    Parameters
+    ----------
+        data: ndarray, shape (T, N)
+            Input signal with T samples over N variates
+
+        fs: int
+            Sampling frequency
+    """
+
+    # Standard param checks
+    errors.check_type(data, np.ndarray)
+    errors.check_dims(data, 2)
+    errors.check_type(fs, int)
+
+    # Parameter set
+    param = {}
+    param['time_band'] = 5.
+    param['n_taper'] = 9
+    param['AlphaTheta_Band'] = [5., 15.]
+    param['Beta_Band'] = [15., 25.]
+    param['LowGamma_Band'] = [30., 40.]
+    param['HighGamma_Band'] = [95., 105.]
+
+    # Build pipeline
+    data_hat = reref.common_avg_ref(data)
+    adj_alphatheta = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['AlphaTheta_Band'])
+    adj_beta = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['Beta_Band'])
+    adj_lowgamma = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['LowGamma_Band'])
+    adj_highgamma = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['HighGamma_Band'])
+
+    return adj_alphatheta, adj_beta, adj_lowgamma, adj_highgamma
