@@ -24,6 +24,11 @@ def node_strength(adj):
     ----------
         adj: ndarray, shape (N, N)
             Undirected, symmetric adjacency matrix with N nodes
+
+    Returns
+    -------
+        deg_vec: ndarray, shape (N,)
+            Node strength vector over N variates
     """
 
     # Standard param checks
@@ -46,6 +51,11 @@ def node_control(adj):
     ----------
         adj: ndarray, shape (N, N)
             Undirected, symmetric adjacency matrix with N nodes
+
+    Returns
+    -------
+        control_vec: ndarray, shape (N,)
+            Control centrality based on delta_sync for each of N variates
     """
 
     # Standard param checks
