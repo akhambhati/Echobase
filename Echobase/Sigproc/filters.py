@@ -41,6 +41,11 @@ def elliptic(data, fs, wpass, wstop, gpass, gstop):
 
         gstop: float
             Stop band minimum attenuation (dB)
+
+    Returns
+    -------
+        data_filt: ndarray, shape (T, N)
+            Filtered signal with T samples over N variates
     """
 
     # Standard param checks
