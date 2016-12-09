@@ -24,6 +24,11 @@ def edge_control(adj):
     ----------
         adj: ndarray, shape (N, N)
             Undirected, symmetric adjacency matrix with N nodes
+
+    Returns
+    -------
+        control_matr: ndarray, shape (N, N)
+            Control centrality matrix assessing delta_sync for each edge
     """
 
     # Standard param checks
