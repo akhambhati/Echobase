@@ -38,6 +38,11 @@ def multitaper(data, fs, time_band, n_taper, cf):
 
         cf: list
             Frequency range over which to compute coherence [-NW+C, C+NW]
+
+    Returns
+    -------
+        adj: ndarray, shape (N, N)
+            Adjacency matrix for N variates
     """
 
     # Standard param checks

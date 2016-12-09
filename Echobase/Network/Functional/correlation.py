@@ -33,6 +33,11 @@ def xcorr_mag(data, fs, tau):
 
         tau: float
             The max lag limits of cross-correlation in seconds
+
+    Returns
+    -------
+        adj: ndarray, shape (N, N)
+            Adjacency matrix for N variates
     """
 
     # Standard param checks
@@ -88,6 +93,11 @@ def xcorr(data, fs, tau):
 
         tau: float
             The max lag limits of cross-correlation in seconds
+
+    Returns
+    -------
+        adj: ndarray, shape (N, N)
+            Adjacency matrix for N variates
     """
 
     # Standard param checks
