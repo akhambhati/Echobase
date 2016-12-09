@@ -25,6 +25,11 @@ def ar_one(data):
     ----------
         data: ndarray, shape (T, N)
             Input signal with T samples over N variates
+
+    Returns
+    -------
+        data_white: ndarray, shape (T, N)
+            Whitened signal with reduced autocorrelative structure
     """
 
     # Standard param checks
