@@ -22,6 +22,11 @@ def synchronizability(adj):
     ----------
         adj: ndarray, shape (N, N)
             Undirected, symmetric adjacency matrix with N nodes
+
+    Returns
+    -------
+        sync: float
+            Synchronizability of the adjacency matrix (lambda_2 / lambda_max)
     """
 
     # Standard param checks
