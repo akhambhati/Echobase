@@ -33,6 +33,11 @@ def broadband_conn(data, fs):
 
         fs: int
             Sampling frequency
+
+    Returns
+    -------
+        adj: ndarray, shape (N, N)
+            Adjacency matrix for N variates
     """
 
     # Standard param checks
@@ -84,6 +89,20 @@ def multiband_conn(data, fs):
 
         fs: int
             Sampling frequency
+
+    Returns
+    -------
+        adj_alphatheta: ndarray, shape (N, N)
+            Adjacency matrix for N variates (Alpha/Theta Band 5-15 Hz)
+
+        adj_beta: ndarray, shape (N, N)
+            Adjacency matrix for N variates (Beta Band 15-25 Hz)
+
+        adj_lowgamma: ndarray, shape (N, N)
+            Adjacency matrix for N variates (Low Gamma Band 30-40 Hz)
+
+        adj_highgamma: ndarray, shape (N, N)
+            Adjacency matrix for N variates (High Gamma Band 95-105 Hz)
     """
 
     # Standard param checks
