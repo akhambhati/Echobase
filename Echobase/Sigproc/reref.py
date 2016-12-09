@@ -23,6 +23,11 @@ def common_avg_ref(data):
     ----------
         data: ndarray, shape (T, N)
             Input signal with T samples over N variates
+
+    Returns
+    -------
+        data_reref: ndarray, shape (T, N)
+            Referenced signal with common mode removed
     """
 
     # Standard param checks
