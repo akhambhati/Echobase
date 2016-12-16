@@ -29,8 +29,7 @@ import nnls
 import matrix_utils as matr_util
 import time
 
-import errors
-from display import my_display
+from ....Common import errors, display
 
 
 def snmf_bcd(cfg_matr, alpha, beta,
@@ -140,7 +139,7 @@ def snmf_bcd(cfg_matr, alpha, beta,
     rel_error = np.zeros(max_iter)
     norm_A = matr_util.norm_fro(A)
 
-    my_display('\nBeginning Non-Negative Matrix Factorization\n', verbose)
+    display.my_display('\nBeginning Non-Negative Matrix Factorization\n', verbose)
     t_iter_start = time.time()
     for ii in xrange(max_iter):
         # Use the Block-Pivot Solver
@@ -164,10 +163,10 @@ def snmf_bcd(cfg_matr, alpha, beta,
         str_iter = 'Iteration %4d' % (ii+1)
         str_err = 'Relative Error: %0.5f' % err
         str_elapsed = 'Elapsed Time: %0.3f sec' % t_iter_elapsed
-        my_display('{} {} | {} | {} \r'.format(str_header, str_iter,
+        display.my_display('{} {} | {} | {} \r'.format(str_header, str_iter,
                                                str_err, str_elapsed),
                    verbose)
-    my_display('\nDone.\n', verbose)
+    display.my_display('\nDone.\n', verbose)
 
     W, H, weights = matr_util.normalize_column_pair(W, H)
 
