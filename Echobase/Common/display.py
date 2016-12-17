@@ -13,7 +13,7 @@ import time
 from IPython.display import clear_output
 
 
-def my_display(txt, verbose):
+def my_display(txt, verbose, str_path=None):
     '''
     Print string to the screen
 
@@ -25,10 +25,21 @@ def my_display(txt, verbose):
         verbose: bool
             Option to robustly automate whether
             text gets printed to the screen
+
+        str_path: str
+            Path to store stdout
     '''
+
+    if str_path is not None:
+        old_stdout = sys.stdout
+        sys.stdout = open(str_path, 'a+')
+
     if verbose:
         sys.stdout.write(txt)
         sys.stdout.flush()
+
+    if str_path is not None:
+        sys.stdout = old_stdout
 
 
 def par_watch_stdout(ar, dt=1.0, truncate=1000):
