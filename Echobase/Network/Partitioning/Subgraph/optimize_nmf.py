@@ -36,7 +36,7 @@ from ....Common import errors, display
 # Helper function for cross validation
 def _cross_val(param_dict):
     # Display output
-    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True)
+    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True, param_dict['str_path']))
 
     # Derive params from dict
     n_train_win, n_train_conn = param_dict['train_cfg_matr'].shape
@@ -78,7 +78,7 @@ def _cross_val(param_dict):
 
 
 def cross_validation(cfg_matr, alpha_list, beta_list,
-                     rank_list, fold, n_proc=8):
+                     rank_list, fold, n_proc=8, str_path=None):
     """
     Pursue k-fold cross-validation of NMF over a list of
     alpha, beta, rank
@@ -100,6 +100,12 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
 
         fold: int
             The number of cross-validation folds to compute
+
+        n_proc: int
+            Number of parallel processes
+
+        str_path: str
+            Text file path to store progress
 
     Returns
     -------
@@ -146,7 +152,8 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
                                    'rank': rank,
                                    'fold_id': fold,
                                    'train_cfg_matr': train_cfg_matr,
-                                   'test_cfg_matr': test_cfg_matr}
+                                   'test_cfg_matr': test_cfg_matr,
+                                   'str_path': str_path}
 
                     param_list.append(param_dict)
 
