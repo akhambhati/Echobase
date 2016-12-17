@@ -36,7 +36,7 @@ from ....Common import errors, display
 # Helper function for cross validation
 def _cross_val(param_dict):
     # Display output
-    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True, param_dict['str_path']))
+    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True, param_dict['str_path'])
 
     # Derive params from dict
     n_train_win, n_train_conn = param_dict['train_cfg_matr'].shape
