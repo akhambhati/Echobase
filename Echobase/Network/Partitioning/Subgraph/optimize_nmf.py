@@ -177,3 +177,44 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
         optimization_dict['error'].append(run_err['error'])
 
     return optimization_dict
+
+
+def min_crossval_param(opt_dict)
+    """
+    Compute the parameter set that produces the minimum cross-validation error.
+
+    Parameters
+    ----------
+        opt_dict: dict, entries: {'alpha', 'beta', 'rank', 'error'}
+            Output from cross_validation function. Each dict entry is a list of length n_param
+
+    Returns
+    -------
+        opt_params: dict, {'rank', 'alpha, 'beta'}
+            Optimum rank, alpha, and beta based on the minimum average cross validation error
+    """
+
+    # Standard param checks
+    errors.check_type(opt_dict, dict)
+
+    # Compute average error as a function of each parameter
+    error_rank = [opt_dict['error'][np.flatnonzero(opt_dict['rank']==rank)].mean()
+                            for rank in np.unique(opt_dict['rank'])]
+    opt_ix = np.argmin(error_rank)
+    opt_rank = np.unique(opt_dict['rank'])[opt_ix]
+
+    error_alpha = [opt_dict['error'][np.flatnonzero(opt_dict['alpha']==alpha)].mean()
+                                for alpha in np.unique(opt_dict['alpha'])]
+    opt_ix = np.argmin(error_alpha)
+    opt_alpha = np.unique(opt_dict['alpha'])[opt_ix]
+
+    error_beta = [opt_dict['error'][np.flatnonzero(opt_dict['beta']==beta)].mean()
+                                for beta in np.unique(opt_dict['beta'])]
+    opt_ix = np.argmin(error_beta)
+    opt_beta = np.unique(opt_dict['beta'])[opt_ix]
+
+    opt_params = {'rank': opt_rank,
+                  'alpha': opt_alpha,
+                  'beta': opt_beta}
+
+    return opt_params
