@@ -179,7 +179,7 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
     return optimization_dict
 
 
-def min_crossval_param(opt_dict)
+def min_crossval_param(opt_dict):
     """
     Compute the parameter set that produces the minimum cross-validation error.
 
