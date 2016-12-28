@@ -1,27 +1,14 @@
 '''
-Non-Negative Matrix Factorization for dynamic brain networks, such that:
-    A ~= WH
-    Constraints:
-        A, W, H >= 0
-        L2-Regularization on W
-        L1-Sparsity on H
+NMF optimization for dynamic brain networks
 
-Implementation is based on :
-    1. Jingu Kim, Yunlong He, and Haesun Park. Algorithms for Nonnegative
-            Matrix and Tensor Factorizations: A Unified View Based on Block
-            Coordinate Descent Framework.
-            Journal of Global Optimization, 58(2), pp. 285-319, 2014.
-    2. Jingu Kim and Haesun Park. Fast Nonnegative Matrix Factorization:
-            An Active-set-like Method And Comparisons.
-            SIAM Journal on Scientific Computing (SISC), 33(6),
-            pp. 3261-3281, 2011.
-Modified from: https://github.com/kimjingu/nonnegfac-python
+Uses cross-validation to find the optimal parameter set for a collection of
+network adjacency matrices.
 
 Created by: Ankit Khambhati
 
 Change Log
 ----------
-2016/02/22 - Implement sparse and regularization penalties
+2016/12/25 - Implemented consensus detection
 '''
 
 import numpy as np
@@ -194,6 +181,7 @@ def min_crossval_param(opt_dict):
             Optimum rank, alpha, and beta based on the minimum average cross validation error
     """
 
+
     # Standard param checks
     errors.check_type(opt_dict, dict)
 
@@ -218,3 +206,129 @@ def min_crossval_param(opt_dict):
                   'beta': opt_beta}
 
     return opt_params
+
+
+def _cons_seeds(param_dict):
+    # Display output
+    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True, param_dict['str_path'])
+
+    # Derive params from dict
+    n_win, n_conn = param_dict['cfg_matr'].shape
+
+    # Run NMF
+    fac_subnet_init = np.random.uniform(low=0.0, high=1.0,
+                                        size=(param_dict['rank'], n_conn))
+    fac_coef_init = np.random.uniform(low=0.0, high=1.0,
+                                      size=(param_dict['rank'], n_win))
+
+    fac_subnet, fac_coef, err = nmf.snmf_bcd(param_dict['cfg_matr'],
+                                             alpha=param_dict['alpha'],
+                                             beta=param_dict['beta'],
+                                             fac_subnet_init=fac_subnet_init,
+                                             fac_coef_init=fac_coef_init,
+                                             max_iter=100, verbose=False)
+
+    return {'param_id': param_dict['param_id'],
+            'fac_subnet': fac_subnet}
+
+
+def consensus_nmf(cfg_matr, opt_alpha, opt_beta,
+                  opt_rank, n_seed, n_proc, str_path=None):
+    """
+    Consensus clustering for NMF
+
+    Parameters
+    ----------
+        cfg_matr: numpy.ndarray
+            The network configuration matrix
+            shape: [n_win x n_conn]
+
+        opt_alpha: float
+            Regularization parameter on W
+
+        opt_beta: float
+            Sparsity parameter on H
+
+        opt_rank: list, int
+            Number of subgraphs to find
+
+        n_seed: int
+            Number of initial seeds to identify consensus subgraphs
+
+        n_proc: int
+            Number of parallel processes
+
+        str_path: str
+            Text file path to store progress
+
+    Returns
+    -------
+        param_error: list, dict: {alpha, beta, rank, fold}
+            Frobenius error over all parameter combinations
+    """
+
+    # Standard param checks
+    errors.check_type(cfg_matr, np.ndarray)
+    errors.check_type(opt_alpha, float)
+    errors.check_type(opt_beta, float)
+    errors.check_type(opt_rank, int)
+    errors.check_type(n_seed, int)
+
+    # Check input dimensions
+    if not len(cfg_matr.shape) == 2:
+        raise ValueError('%r does not have two dimensions' % cfg_matr)
+    n_win = cfg_matr.shape[0]
+    n_conn = cfg_matr.shape[1]
+
+    # Generate parameter list
+    param_list = []
+    param_id = 0
+    for seed_id in xrange(n_seed):
+        param_dict =  {'param_id': param_id,
+                       'alpha': opt_alpha,
+                       'beta': opt_beta,
+                       'rank': opt_rank,
+                       'seed_id': seed_id,
+                       'cfg_matr': cfg_matr,
+                       'str_path': str_path}
+
+        param_list.append(param_dict)
+
+        param_id += 1
+
+    # Run parloop
+    pool = mp.Pool(processes=n_proc,)
+    pop_fac = pool.map(_cons_seeds, param_list)
+
+    # Concatenate subgraphs into ensemble
+    subnet_ensemble = np.zeros((opt_rank*n_seed, n_conn))
+    obs_id = 0
+    for fac in pop_fac:
+        for subnet in fac['fac_subnet']:
+            subnet_ensemble[obs_id, :] = subnet[...]
+            obs_id += 1
+
+    # NMF on the ensemble to uncover subgraphs
+    subnet_ens_init = np.random.uniform(low=0.0, high=1.0, size=(opt_rank, n_conn))
+    coef_ens_init = np.random.uniform(low=0.0, high=1.0, size=(opt_rank, opt_rank*n_seed))
+
+    subnet_ens, coef_ens, err = nmf.snmf_bcd(
+        subnet_ensemble,
+        alpha=0.0,
+        beta=0.0,
+        fac_subnet_init=subnet_ens_init,
+        fac_coef_init=coef_ens_init,
+        max_iter=100, verbose=True)
+
+    # Final NMF to compute coefficients
+    coef_ens_init = np.random.uniform(low=0.0, high=1.0, size=(opt_rank, n_win))
+
+    subnet_ens, coef_ens, err = nmf.snmf_bcd(
+        cfg_matr,
+        alpha=opt_alpha,
+        beta=opt_beta,
+        fac_subnet_init=subnet_ens,
+        fac_coef_init=coef_ens_init,
+        max_iter=100, verbose=True)
+
+    return subnet_ens, coef_ens, err
