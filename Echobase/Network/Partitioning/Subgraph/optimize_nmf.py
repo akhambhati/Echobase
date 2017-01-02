@@ -263,8 +263,14 @@ def consensus_nmf(cfg_matr, opt_alpha, opt_beta,
 
     Returns
     -------
-        param_error: list, dict: {alpha, beta, rank, fold}
-            Frobenius error over all parameter combinations
+        subnet_ens: numpy.ndarray shape: [rank x n_conn]
+            Consensus partitions across ensemble of subgraph estimates
+
+        coef_ens: numpy.ndarray shape: [rank x n_win]
+            Coefficients for consensus subgraphs
+
+        err: numpy.ndarray
+            Reconstruction error for consensus subgraphs and coefficients
     """
 
     # Standard param checks
