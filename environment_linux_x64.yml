@@ -18,7 +18,6 @@ dependencies:
 - conda-forge::functools32=3.2.3.2=py27_1
 - conda-forge::h5py=2.6.0=np111py27_7
 - conda-forge::hdf5=1.8.17=9
-- conda-forge::icu=58.1=0
 - conda-forge::ipykernel=4.5.2=py27_0
 - conda-forge::ipython=5.2.0=py27_0
 - conda-forge::ipython_genutils=0.1.0=py27_0
