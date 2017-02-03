@@ -1,4 +1,4 @@
-name: Echobase
+name: echobase
 channels: !!python/tuple
 - !!python/unicode
   'defaults'
@@ -128,8 +128,6 @@ dependencies:
   - packaging==16.8
   - pandocfilters==1.4.1
   - prompt-toolkit==1.0.9
-  - pyedflib==0.1.7.dev0+0840a01
-  - python-edf==0.5
   - testpath==0.3
-prefix: /Users/akhambhati/Developer/miniconda2/envs/Echobase
+prefix: /Users/akhambhati/Developer/miniconda2/envs/echobase
 
