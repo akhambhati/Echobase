@@ -16,7 +16,7 @@ from ...Common import errors
 from ..Transforms import configuration
 
 
-def surrogate_trend(adj, dist, mean_ord, std_ord):
+def surrogate_trend(adj, dist, mean_ord, std_ord, perm_seq=None):
     """
     Random graphs that preserve distance effect
 
@@ -33,6 +33,9 @@ def surrogate_trend(adj, dist, mean_ord, std_ord):
 
         std_ord: int
             Polynommial fit order for preserving standard deviation
+
+        perm_seq: ndarray, shape (N*(N-1)/2)
+            Randomized indices corresponding to edge weights of `adj'
 
     Returns
     -------
@@ -68,8 +71,11 @@ def surrogate_trend(adj, dist, mean_ord, std_ord):
     pfit2 = np.polyfit(dist_vec, np.abs(demean_cfg_vec), std_ord)
     std_cfg_vec = demean_cfg_vec / np.polyval(pfit2, dist_vec)
 
-    # Rewire the edges
-    rnd_cfg_vec = np.random.permutation(std_cfg_vec)
+    # Rewire the edges using pre-permuted sequence or random permutation
+    if perm_seq == None:
+        rnd_cfg_vec = np.random.permutation(std_cfg_vec)
+    else:
+        rnd_cfg_vec = std_cfg_vec[perm_seq]
 
     # Add geometry back
     rnd_cfg_vec = rnd_cfg_vec * np.polyval(pfit2, dist_vec)
