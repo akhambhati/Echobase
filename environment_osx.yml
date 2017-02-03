@@ -90,7 +90,7 @@ dependencies:
 - sip=4.18=py27_0
 - six=1.10.0=py27_0
 - sqlite=3.13.0=0
-- ssl_match_hostname=3.4.0.2=py27_1
+- ssl_match_hostname=3.4.0.2=py27_0
 - statsmodels=0.6.1=np111py27_1
 - subprocess32=3.2.7=py27_0
 - terminado=0.6=py27_0
@@ -124,6 +124,7 @@ dependencies:
   - jupyter-nbextensions-configurator==0.2.3
   - mne==0.13
   - mtspec==0.3.2
+  - nilearn==0.2.6
   - packaging==16.8
   - pandocfilters==1.4.1
   - prompt-toolkit==1.0.9
