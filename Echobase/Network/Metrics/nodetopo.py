@@ -18,7 +18,7 @@ from ..Transforms import lesion
 
 def node_strength(adj):
     """
-    Function for computing average strength of connections from a node
+    Function for computing sum of connection strengths from a node
 
     Parameters
     ----------
