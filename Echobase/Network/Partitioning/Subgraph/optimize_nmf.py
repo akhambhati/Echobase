@@ -60,8 +60,14 @@ def _cross_val(param_dict):
                                     test_fac_coef.T,
                                     norm_test_cfg_matr) / norm_test_cfg_matr
 
+    # Compute sparsity of the subgraphs and coefficients
+    pct_sparse_subnet = (train_fac_subnet==0).mean(axis=1).mean()
+    pct_sparse_coef = (test_fac_coef==0).mean(axis=1).mean()
+
     return {'param_id': param_dict['param_id'],
-            'error': err}
+            'error': err,
+            'pct_sparse_subgraph': pct_sparse_subnet,
+            'pct_sparse_coef': pct_sparse_coef}
 
 
 def cross_validation(cfg_matr, alpha_list, beta_list,
@@ -96,8 +102,9 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
 
     Returns
     -------
-        param_error: list, dict: {alpha, beta, rank, fold}
-            Frobenius error over all parameter combinations
+        optimization_dict: list, dict: {alpha, beta, rank, error}
+            dictionary containing quality measures as a function of the
+            alpha, beta and rank
     """
 
     # Standard param checks
@@ -154,7 +161,9 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
     optimization_dict = {'alpha': [],
                          'beta': [],
                          'rank': [],
-                         'error': []}
+                         'error': [],
+                         'pct_sparse_subgraph': [],
+                         'pct_sparse_coef': []}
 
     for run_err in pop_err:
         error_id = run_err['param_id']
@@ -162,6 +171,8 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
         optimization_dict['beta'].append(param_list[error_id]['beta'])
         optimization_dict['rank'].append(param_list[error_id]['rank'])
         optimization_dict['error'].append(run_err['error'])
+        optimization_dict['pct_sparse_subgraph'].append(run_err['pct_subgraph_sparse'])
+        optimization_dict['pct_sparse_coef'].append(run_err['pct_sparse_coef'])
 
     return optimization_dict
 
