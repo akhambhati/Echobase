@@ -171,7 +171,7 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
         optimization_dict['beta'].append(param_list[error_id]['beta'])
         optimization_dict['rank'].append(param_list[error_id]['rank'])
         optimization_dict['error'].append(run_err['error'])
-        optimization_dict['pct_sparse_subgraph'].append(run_err['pct_subgraph_sparse'])
+        optimization_dict['pct_sparse_subgraph'].append(run_err['pct_sparse_subgraph'])
         optimization_dict['pct_sparse_coef'].append(run_err['pct_sparse_coef'])
 
     return optimization_dict
