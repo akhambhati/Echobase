@@ -42,6 +42,11 @@ def surrogate_trend(adj, dist, mean_ord, std_ord, perm_seq=None):
         adj_wgt: ndarray, shape (N, N)
             Undirected, symmetric surrogate adjacency matrix with N nodes
             The edge distribution is preserved, but not strengths
+
+        adj_detrend: ndarray, shape (N, N)
+            Undirected, symmetric adjacency matrix with N nodes
+            The topology is preserved but the contribution of geometry
+            to the edge weights is removed
     """
 
     # Standard param checks
@@ -71,6 +76,9 @@ def surrogate_trend(adj, dist, mean_ord, std_ord, perm_seq=None):
     pfit2 = np.polyfit(dist_vec, np.abs(demean_cfg_vec), std_ord)
     std_cfg_vec = demean_cfg_vec / np.polyval(pfit2, dist_vec)
 
+    # Put into adjacency matrix
+    adj_detrend = configuration.convert_conn_vec_to_adj_matr(std_cfg_vec)
+
     # Rewire the edges using pre-permuted sequence or random permutation
     if perm_seq == None:
         rnd_cfg_vec = np.random.permutation(std_cfg_vec)
@@ -88,7 +96,8 @@ def surrogate_trend(adj, dist, mean_ord, std_ord, perm_seq=None):
     # Put into adjacency matrix
     adj_wgt = configuration.convert_conn_vec_to_adj_matr(rank_cfg_vec)
 
-    return adj_wgt
+
+    return adj_wgt, adj_detrend
 
 
 def bin_perm(adj, dist, n_bins):
