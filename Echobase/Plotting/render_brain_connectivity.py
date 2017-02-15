@@ -83,43 +83,43 @@ def draw(vtk_files, node_coords, conn_list=None, brain_rgba=(0.5, 0.5, 0.5, 0.2)
     ### Connection-Locations
     if conn_list is None:
         print('No connections specified')
-        return
-    assert len(conn_list) == n_conn
+    else:
+        assert len(conn_list) == n_conn
 
-    # Generate all vectors
-    e_start = np.zeros((n_conn, 3))
-    e_vec = np.zeros((n_conn, 3))
+        # Generate all vectors
+        e_start = np.zeros((n_conn, 3))
+        e_vec = np.zeros((n_conn, 3))
 
-    triu_ix, triu_iy = np.triu_indices(n_node, k=1)
+        triu_ix, triu_iy = np.triu_indices(n_node, k=1)
 
-    for ii, (ix, iy) in enumerate(zip(triu_ix, triu_iy)):
-        e_start[ii, :] = node_coords[ix, :]
-        e_vec[ii, :] = (node_coords[iy, :] - node_coords[ix, :])
+        for ii, (ix, iy) in enumerate(zip(triu_ix, triu_iy)):
+            e_start[ii, :] = node_coords[ix, :]
+            e_vec[ii, :] = (node_coords[iy, :] - node_coords[ix, :])
 
-    # Threshold the connections
-    thresh_lower_ix = np.flatnonzero(conn_list > np.percentile(conn_list, 100*conn_thr[0]))
-    thresh_upper_ix = np.flatnonzero(conn_list < np.percentile(conn_list, 100*conn_thr[1]))
-    thr_ix = np.intersect1d(thresh_lower_ix, thresh_upper_ix)
+        # Threshold the connections
+        thresh_lower_ix = np.flatnonzero(conn_list > np.percentile(conn_list, 100*conn_thr[0]))
+        thresh_upper_ix = np.flatnonzero(conn_list < np.percentile(conn_list, 100*conn_thr[1]))
+        thr_ix = np.intersect1d(thresh_lower_ix, thresh_upper_ix)
 
-    # Import vectors (connections) into pipeline
-    edg_source = mlab.pipeline.vector_scatter(e_start[thr_ix, 0],
-                                              e_start[thr_ix, 1],
-                                              e_start[thr_ix, 2],
-                                              e_vec[thr_ix, 0],
-                                              e_vec[thr_ix, 1],
-                                              e_vec[thr_ix, 2])
-    edg_source.mlab_source.dataset.point_data.scalars = conn_list[thr_ix]
+        # Import vectors (connections) into pipeline
+        edg_source = mlab.pipeline.vector_scatter(e_start[thr_ix, 0],
+                                                e_start[thr_ix, 1],
+                                                e_start[thr_ix, 2],
+                                                e_vec[thr_ix, 0],
+                                                e_vec[thr_ix, 1],
+                                                e_vec[thr_ix, 2])
+        edg_source.mlab_source.dataset.point_data.scalars = conn_list[thr_ix]
 
-    edg_surface = mlab.pipeline.vectors(edg_source, colormap=conn_cmap, scale_factor=1,
-                                        line_width=2.0, scale_mode='vector')
+        edg_surface = mlab.pipeline.vectors(edg_source, colormap=conn_cmap, scale_factor=1,
+                                            line_width=2.0, scale_mode='vector')
 
-    edg_surface.glyph.glyph.clamping = False
-    edg_surface.actor.property.opacity = 0.75
-    edg_surface.module_manager.vector_lut_manager.reverse_lut = False
+        edg_surface.glyph.glyph.clamping = False
+        edg_surface.actor.property.opacity = 0.75
+        edg_surface.module_manager.vector_lut_manager.reverse_lut = False
 
-    edg_surface.glyph.glyph_source.glyph_source = (
-    edg_surface.glyph.glyph_source.glyph_dict['glyph_source2d'])
-    edg_surface.glyph.glyph_source.glyph_source.glyph_type='dash'
+        edg_surface.glyph.glyph_source.glyph_source = (
+        edg_surface.glyph.glyph_source.glyph_dict['glyph_source2d'])
+        edg_surface.glyph.glyph_source.glyph_source.glyph_type='dash'
 
     # Get the associated scene
     my_scene = my_engine.scenes[0]
