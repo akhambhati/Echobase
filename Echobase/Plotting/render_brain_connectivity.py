@@ -67,18 +67,20 @@ def draw(vtk_files, node_coords, conn_list=None, brain_rgba=(0.5, 0.5, 0.5, 0.2)
     n_node = node_coords.shape[0]
     n_conn = np.int(n_node*(n_node-1)*0.5)
 
-    # Import coordinates into pipeline
-    crd_source = mlab.pipeline.scalar_scatter(node_coords[:, 0],
-                                              node_coords[:, 1],
-                                              node_coords[:, 2])
-    # Render Glyphs for node points
-    crd_surface = mlab.pipeline.glyph(crd_source,
-                                      scale_mode='none',
-                                      scale_factor=node_rad,
-                                      mode='sphere',
-                                      colormap='cool',
-                                      color=node_rgba[:3],
-                                      opacity=node_rgba[3])
+    for ix in xrange(node_coords.shape[0]):
+
+        # Import coordinates into pipeline
+        crd_source = mlab.pipeline.scalar_scatter(node_coords[ix, 0],
+                                                node_coords[ix, 1],
+                                                node_coords[ix, 2])
+        # Render Glyphs for node points
+        crd_surface = mlab.pipeline.glyph(crd_source,
+                                        scale_mode='none',
+                                        scale_factor=node_rad,
+                                        mode='sphere',
+                                        colormap='cool',
+                                        color=node_rgba[ix][:3],
+                                        opacity=node_rgba[ix][3])
 
     ### Connection-Locations
     if conn_list is None:
