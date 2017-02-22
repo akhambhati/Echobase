@@ -136,9 +136,7 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
         train_cfg_matr = cfg_matr[train_obs_ix, :]
         test_cfg_matr = cfg_matr[test_obs_ix, :]
 
-        for alpha in alpha_list:
-            for beta in beta_list:
-                for rank in rank_list:
+        for alpha, beta, rank in zip(alpha_list, beta_list, rank_list):
 
                     param_dict =  {'param_id': param_id,
                                    'alpha': alpha,
