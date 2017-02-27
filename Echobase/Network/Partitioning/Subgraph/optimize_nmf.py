@@ -151,6 +151,9 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
 
                     param_id += 1
 
+    if n_proc == 'sge':
+        return param_list
+
     # Run parloop
     pool = mp.Pool(processes=n_proc,)
     pop_err = pool.map(_cross_val, param_list)
