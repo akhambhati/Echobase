@@ -34,11 +34,13 @@ def draw(vtk_files, node_coords, conn_list=None, brain_rgba=(0.5, 0.5, 0.5, 0.2)
         brain_rgba: tuple, shape: (4,)
             RGBA color scheme for the brain surface reconstruction
 
-        node_rgba: tuple, shape: (4,)
-            RGBA color scheme for spheres representing each node
+        node_rgba: list of tuples, each list-entry has shape: (4,)
+            Each tuple is the RGBA color scheme for spheres representing each node
+            The size of the list should be equal to n_node
 
-        node_rad: float
+        node_rad: list of floats
             Radius specifying sphere size associated with each node
+            The size of the list should be equal to n_node
 
         conn_thr: list, shape: (2,)
             Lower and upper percentiles for thresholding connections to plot
@@ -76,7 +78,7 @@ def draw(vtk_files, node_coords, conn_list=None, brain_rgba=(0.5, 0.5, 0.5, 0.2)
         # Render Glyphs for node points
         crd_surface = mlab.pipeline.glyph(crd_source,
                                         scale_mode='none',
-                                        scale_factor=node_rad,
+                                        scale_factor=node_rad[ix],
                                         mode='sphere',
                                         colormap='cool',
                                         color=node_rgba[ix][:3],
