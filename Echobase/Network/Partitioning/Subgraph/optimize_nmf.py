@@ -19,15 +19,135 @@ import multiprocessing as mp
 
 from ....Common import errors, display
 
+def gen_random_sampling_paramset(rank_range, alpha_range, beta_range, n_param,
+                                 fold_list, str_path=None):
+    """
+    Generate a parameter dictionary for optimizing NMF
+
+    Parameters
+    ----------
+        rank_range: tuple, (2,)
+            Number of subgraphs to find
+            Supply lower and upper bounds on the search space (uniform sampling)
+
+        alpha_range: tuple, (2,)
+            Regularization parameter on W
+            Supply lower and upper bounds on the search space (uniform sampling)
+
+        beta_range: tuple, (2,)
+            Sparsity parameter on H
+            Supply lower and upper bounds on the search space (uniform sampling)
+
+        n_param: int
+            Number of random samples to pursue
+
+        fold_list: list of lists
+            Each nested list contains the observations indices that are members
+            of each fold
+
+        str_path: str
+            Text file path to store progress
+
+    Returns
+    -------
+        param_list: list of dict: {param_id, alpha, beta, rank, fold_id,
+                                   train_ix, test_ix, str_path}
+            Each list entry contains a dictionary of a single parameter set
+            for NMF optimization
+    """
+
+    # Standard param checks
+    errors.check_type(alpha_range, tuple)
+    errors.check_type(beta_range, tuple)
+    errors.check_type(rank_range, tuple)
+    errors.check_type(n_param, int)
+    errors.check_type(fold_list, list)
+
+    # Generate the random samples
+    rank_list = np.random.randint(low=rank_range[0], high=rank_range[1]+1, size=n_param)
+    alpha_list = np.random.uniform(low=alpha_range[0], high=alpha_range[1], size=n_param)
+    beta_list = np.random.uniform(low=beta_range[0], high=beta_range[1], size=n_param)
+
+    # Generate fold list
+    n_fold = len(fold_list)
+
+    # Check the folds for size-matching and repeats
+    all_fold_ix = []
+    all_fold_size = []
+    for fold_id in xrange(n_fold):
+        all_fold_size.append(len(fold_list[fold_id]))
+        for fold_ix in fold_list[fold_id]:
+            all_fold_ix.append(fold_ix)
+
+    if not len(all_fold_ix) == len(np.unique(all_fold_ix)):
+        raise Exception('Folds have overlapping, non-unique observations')
+
+    if np.sum(np.abs(np.diff(np.array(all_fold_size)))) > 0:
+        print('Warning: Folds are of unequal size')
+
+    # Generate parameter list
+    param_list = []
+    param_id = 0
+    for fold_id in xrange(n_fold):
+        test_ix = fold_list[fold_id]
+
+        train_ix = []
+        for nonfold_id in np.setdiff1d(np.arange(n_fold), fold_id):
+            for fold_ix in fold_list[nonfold_id]:
+                train_ix.append(fold_ix)
+
+        for alpha, beta, rank in zip(alpha_list, beta_list, rank_list):
+            param_dict =  {'param_id': param_id,
+                           'alpha': alpha,
+                           'beta': beta,
+                           'rank': rank,
+                           'fold_id': fold_id,
+                           'train_ix': train_ix,
+                           'test_ix': test_ix,
+                           'str_path': str_path}
+            param_list.append(param_dict)
+            param_id += 1
+
+    return param_list
+
 
 # Helper function for cross validation
-def _cross_val(param_dict):
-    # Display output
-    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True, param_dict['str_path'])
+def run_xval_paramset(cfg_matr, param_dict):
+    """
+    Run NMF cross-validation using a single parameter dictionary generated from
+    gen_random_sampling_paramset
+
+    Parameters
+    ----------
+        cfg_matr: numpy.ndarray, shape:(n_win, n_conn)
+            The network configuration matrix
+
+        param_dict: dict with keys: {param_id, alpha, beta, rank, fold_id,
+                                     train_ix, test_ix, str_path}
+            Single entry of list of dicts returned by gen_random_sampling_paramset
+
+
+    Return
+    ------
+        qmeas_dict: dict with keys: {param_id, err,
+                                     pct_sparse_subnet, pct_sparse_coef}
+            Quality measures associated with param_dict
+    """
+
+    # Check input dimensions of cfg_matr
+    if not len(cfg_matr.shape) == 2:
+        raise ValueError('%r does not have two dimensions' % cfg_matr)
+    n_win = cfg_matr.shape[0]
+    n_conn = cfg_matr.shape[1]
 
     # Derive params from dict
-    n_train_win, n_train_conn = param_dict['train_cfg_matr'].shape
-    n_test_win, n_test_conn = param_dict['test_cfg_matr'].shape
+    train_cfg_matr = cfg_matr[param_dict['train_ix'], :]
+    test_cfg_matr = cfg_matr[param_dict['test_ix'], :]
+    n_train_win, n_train_conn = train_cfg_matr.shape
+    n_test_win, n_test_conn = test_cfg_matr.shape
+
+    # Display output
+    display.my_display('Optimizing parameter set: {} \n'.format(param_dict['param_id']), True, param_dict['str_path'])
 
     # Run NMF on training set
     fac_subnet_init = np.random.uniform(low=0.0, high=1.0,
@@ -35,7 +155,7 @@ def _cross_val(param_dict):
     fac_coef_init = np.random.uniform(low=0.0, high=1.0,
                                       size=(param_dict['rank'], n_train_win))
 
-    train_fac_subnet, train_fac_coef, train_err = nmf.snmf_bcd(param_dict['train_cfg_matr'],
+    train_fac_subnet, train_fac_coef, train_err = nmf.snmf_bcd(train_cfg_matr,
                                                                alpha=param_dict['alpha'],
                                                                beta=param_dict['beta'],
                                                                fac_subnet_init=fac_subnet_init,
@@ -46,7 +166,7 @@ def _cross_val(param_dict):
     fac_coef_init = np.random.uniform(low=0.0, high=1.0,
                                       size=(param_dict['rank'], n_test_win))
 
-    _, test_fac_coef, _ = nmf.snmf_bcd(param_dict['test_cfg_matr'],
+    _, test_fac_coef, _ = nmf.snmf_bcd(test_cfg_matr,
                                        alpha=param_dict['alpha'],
                                        beta=param_dict['beta'],
                                        fac_subnet_init=train_fac_subnet,
@@ -54,8 +174,8 @@ def _cross_val(param_dict):
                                        max_iter=1, verbose=False)
 
     # Compute error
-    norm_test_cfg_matr = matrix_utils.norm_fro(param_dict['test_cfg_matr'].T)
-    err = matrix_utils.norm_fro_err(param_dict['test_cfg_matr'].T,
+    norm_test_cfg_matr = matrix_utils.norm_fro(test_cfg_matr.T)
+    err = matrix_utils.norm_fro_err(test_cfg_matr.T,
                                     train_fac_subnet.T,
                                     test_fac_coef.T,
                                     norm_test_cfg_matr) / norm_test_cfg_matr
@@ -64,99 +184,35 @@ def _cross_val(param_dict):
     pct_sparse_subnet = (train_fac_subnet==0).mean(axis=1).mean()
     pct_sparse_coef = (test_fac_coef==0).mean(axis=1).mean()
 
-    return {'param_id': param_dict['param_id'],
-            'error': err,
-            'pct_sparse_subgraph': pct_sparse_subnet,
-            'pct_sparse_coef': pct_sparse_coef}
+    qmeas_dict = {'param_id': param_dict['param_id'],
+                  'error': err,
+                  'pct_sparse_subgraph': pct_sparse_subnet,
+                  'pct_sparse_coef': pct_sparse_coef}
+
+    return qmeas_dict
 
 
-def cross_validation(cfg_matr, alpha_list, beta_list,
-                     rank_list, fold, n_proc=8, str_path=None):
+def find_optimum_xval_paramset(param_list, qmeas_list):
     """
-    Pursue k-fold cross-validation of NMF over a list of
-    alpha, beta, rank
+    Integrate the parameter set and the quality measures to identify
+    optimal parameter set based on minimum cross-validation error
 
     Parameters
     ----------
-        cfg_matr: numpy.ndarray
-            The network configuration matrix
-            shape: [n_win x n_conn]
+        param_list: list of dict with keys: {param_id, alpha, beta, rank, fold_id,
+                                     train_ix, test_ix, str_path}
+            List of dicts returned by gen_random_sampling_paramset
 
-        alpha_list: list, float
-            Regularization parameter on W
+        qmeas_list: list of dict with keys: {param_id, err,
+                                             pct_sparse_subnet, pct_sparse_coef}
+            List of dicts aggregated over param_list runs of run_xval_paramset
 
-        beta_list: list, float
-            Sparsity parameter on H
+    Return
+    ------
+        optimization_dict: dict with each quality measure and associated parameters
 
-        rank_list: list, int
-            Number of subgraphs to find
-
-        fold: int
-            The number of cross-validation folds to compute
-
-        n_proc: int
-            Number of parallel processes
-
-        str_path: str
-            Text file path to store progress
-
-    Returns
-    -------
-        optimization_dict: list, dict: {alpha, beta, rank, error}
-            dictionary containing quality measures as a function of the
-            alpha, beta and rank
+        opt_param_dict: dict with optimum rank, alpha, beta
     """
-
-    # Standard param checks
-    errors.check_type(alpha_list, list)
-    errors.check_type(beta_list, list)
-    errors.check_type(rank_list, list)
-    errors.check_type(fold, int)
-
-    # Check input dimensions
-    if not len(cfg_matr.shape) == 2:
-        raise ValueError('%r does not have two dimensions' % cfg_matr)
-    n_win = cfg_matr.shape[0]
-    n_conn = cfg_matr.shape[1]
-
-    # Generate fold list
-    n_obs_per_fold = int(np.floor(n_win / fold))
-    n_max_fold = int(np.floor(n_win / (2*np.max(rank_list))))
-    if n_obs_per_fold < 2*np.max(rank_list):
-        raise ValueError('Number of folds can be max {}'.format(n_max_fold))
-    all_obs_ix = np.random.permutation(n_win)[:n_obs_per_fold*fold]
-
-    # Generate parameter list
-    param_list = []
-    param_id = 0
-    for fold_id in xrange(fold):
-        test_obs_ix = all_obs_ix[fold_id*n_obs_per_fold:(fold_id+1)*n_obs_per_fold]
-        train_obs_ix = np.setdiff1d(all_obs_ix, test_obs_ix)
-
-        train_cfg_matr = cfg_matr[train_obs_ix, :]
-        test_cfg_matr = cfg_matr[test_obs_ix, :]
-
-        for alpha, beta, rank in zip(alpha_list, beta_list, rank_list):
-
-                    param_dict =  {'param_id': param_id,
-                                   'alpha': alpha,
-                                   'beta': beta,
-                                   'rank': rank,
-                                   'fold_id': fold,
-                                   'train_cfg_matr': train_cfg_matr,
-                                   'test_cfg_matr': test_cfg_matr,
-                                   'str_path': str_path}
-
-                    param_list.append(param_dict)
-
-                    param_id += 1
-
-    if n_proc == 'sge':
-        return param_list
-
-    # Run parloop
-    pool = mp.Pool(processes=n_proc,)
-    pop_err = pool.map(_cross_val, param_list)
 
     # Reformulate into a single dictionary list
     optimization_dict = {'alpha': [],
@@ -166,58 +222,31 @@ def cross_validation(cfg_matr, alpha_list, beta_list,
                          'pct_sparse_subgraph': [],
                          'pct_sparse_coef': []}
 
-    for run_err in pop_err:
-        error_id = run_err['param_id']
-        optimization_dict['alpha'].append(param_list[error_id]['alpha'])
-        optimization_dict['beta'].append(param_list[error_id]['beta'])
-        optimization_dict['rank'].append(param_list[error_id]['rank'])
-        optimization_dict['error'].append(run_err['error'])
-        optimization_dict['pct_sparse_subgraph'].append(run_err['pct_sparse_subgraph'])
-        optimization_dict['pct_sparse_coef'].append(run_err['pct_sparse_coef'])
+    for qmeas_dict in qmeas_list:
+        for param_dict in param_list:
+            if qmeas_dict['param_id'] == param_dict['param_id']:
+                optimization_dict['alpha'].append(param_dict['alpha'])
+                optimization_dict['beta'].append(param_dict['beta'])
+                optimization_dict['rank'].append(param_dict['rank'])
+                optimization_dict['error'].append(qmeas_dict['error'])
+                optimization_dict['pct_sparse_subgraph'].append(qmeas_dict['pct_sparse_subgraph'])
+                optimization_dict['pct_sparse_coef'].append(qmeas_dict['pct_sparse_coef'])
 
-    return optimization_dict
+    for key in optimization_dict.keys():
+        optimization_dict[key] = np.array(optimization_dict[key])
 
+    # Find optimum parameter set
+    opt_param_dict = {}
+    opt_param_dict['rank'] = int(optimization_dict['rank'][optimization_dict['error'] < np.percentile(optimization_dict['error'], 25)].mean().round())
+    opt_param_dict['alpha'] = optimization_dict['alpha'][optimization_dict['error'] < np.percentile(optimization_dict['error'], 25)].mean()
+    opt_param_dict['beta'] = optimization_dict['beta'][optimization_dict['error'] < np.percentile(optimization_dict['error'], 25)].mean()
 
-def min_crossval_param(opt_dict):
-    """
-    Compute the parameter set that produces the minimum cross-validation error.
-
-    Parameters
-    ----------
-        opt_dict: dict, entries: {'alpha', 'beta', 'rank', 'error'}
-            Output from cross_validation function. Each dict entry is a list of length n_param
-
-    Returns
-    -------
-        opt_params: dict, {'rank', 'alpha, 'beta'}
-            Optimum rank, alpha, and beta based on the minimum average cross validation error
-    """
+    print('Optimal Rank: {}'.format(opt_param_dict['rank']))
+    print('Optimal Alpha: {}'.format(opt_param_dict['alpha']))
+    print('Optimal Beta: {}'.format(opt_param_dict['beta']))
 
 
-    # Standard param checks
-    errors.check_type(opt_dict, dict)
-
-    # Compute average error as a function of each parameter
-    error_rank = [opt_dict['error'][np.flatnonzero(opt_dict['rank']==rank)].mean()
-                            for rank in np.unique(opt_dict['rank'])]
-    opt_ix = np.argmin(error_rank)
-    opt_rank = np.unique(opt_dict['rank'])[opt_ix]
-
-    error_alpha = [opt_dict['error'][np.flatnonzero(opt_dict['alpha']==alpha)].mean()
-                                for alpha in np.unique(opt_dict['alpha'])]
-    opt_ix = np.argmin(error_alpha)
-    opt_alpha = np.unique(opt_dict['alpha'])[opt_ix]
-
-    error_beta = [opt_dict['error'][np.flatnonzero(opt_dict['beta']==beta)].mean()
-                                for beta in np.unique(opt_dict['beta'])]
-    opt_ix = np.argmin(error_beta)
-    opt_beta = np.unique(opt_dict['beta'])[opt_ix]
-
-    opt_params = {'rank': opt_rank,
-                  'alpha': opt_alpha,
-                  'beta': opt_beta}
-
-    return opt_params
+    return optimization_dict, opt_param_dict
 
 
 def _cons_seeds(param_dict):
