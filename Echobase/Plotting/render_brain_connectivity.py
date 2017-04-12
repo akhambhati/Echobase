@@ -99,27 +99,23 @@ def draw(surf_vertices, surf_triangles, surf_scalars, surf_cmap, surf_opacity,
     hi_thr = np.percentile(conn_list, conn_pct[1])
     conn_thr_idx = np.flatnonzero((conn_list >= lo_thr) & (conn_list <= hi_thr))
 
-    conn_list = conn_list[conn_thr_idx]
-    conn_list = (conn_list - conn_list.min()) / (conn_list.max() - conn_list.min())
-    e_start = e_start[conn_thr_idx, :]
-    e_vec = e_vec[conn_thr_idx, :]
-
     # Import vectors into pipeline
-    thr_ix = np.argsort(conn_list)
-    conn_source = mlab.pipeline.vector_scatter(e_start[thr_ix, 0],
-                                               e_start[thr_ix, 1],
-                                               e_start[thr_ix, 2],
-                                               e_vec[thr_ix, 0],
-                                               e_vec[thr_ix, 1],
-                                               e_vec[thr_ix, 2], figure=fig)
-    conn_source.mlab_source.dataset.point_data.scalars = conn_list[thr_ix]
+    conn_source = mlab.pipeline.vector_scatter(e_start[:, 0],
+                                               e_start[:, 1],
+                                               e_start[:, 2],
+                                               e_vec[:, 0],
+                                               e_vec[:, 1],
+                                               e_vec[:, 2], figure=fig)
+    conn_source.mlab_source.dataset.point_data.scalars = conn_list
+
+    #conn_thresh = mlab.pipeline.threshold(conn_source, low=lo_thr, up=hi_thr, figure=fig)
 
     # Change connection attributes
     conn_surface = mlab.pipeline.vectors(conn_source, colormap=conn_cmap,
-                                         scale_factor=1, line_width=3,
+                                         scale_factor=1, line_width=4, transparent=True,
                                          scale_mode='vector', figure=fig)
     conn_surface.glyph.glyph.clamping = False
-    conn_surface.actor.property.opacity = 0.75
+    #conn_surface.actor.property.opacity = 0.1
     conn_surface.module_manager.vector_lut_manager.reverse_lut = False
 
     conn_surface.glyph.glyph_source.glyph_source = (\
@@ -132,16 +128,18 @@ def draw(surf_vertices, surf_triangles, surf_scalars, surf_cmap, surf_opacity,
                                                        surf_vertices[:, 2],
                                                        surf_triangles,
                                                        scalars=surf_scalars,
-                                                       opacity=surf_opacity,
+                                                       opacity=1.0,
                                                        figure=fig)
     surf_norms = mlab.pipeline.poly_data_normals(surf_source, figure=fig)
     surf_norms.filter.splitting = True
     surf_surf = mlab.pipeline.surface(surf_norms, figure=fig)
 
     surf_surf.parent.scalar_lut_manager.set(lut_mode=surf_cmap,
-                                             use_default_range=False)
+                                            data_range=[0, 1],
+                                            use_default_range=False)
     lut = surf_surf.module_manager.scalar_lut_manager.lut.table.to_array()
     lut[:, 3] = surf_opacity
     surf_surf.module_manager.scalar_lut_manager.lut.table = lut
+    surf_surf.actor.property.backface_culling = True
 
-    return my_engine
+    return my_engine, conn_source
