@@ -9,6 +9,16 @@ Change Log
 2017/02/11 -- Created the draw function
 """
 
+"""
+TODO: GlassBrain Project
+1. modularize each function and generate class structure to interact with mlab
+2. instantiate all edges, nodes, separately so that the scalar values can be updated
+   without redrawing the whole figure
+3. optimize the surface rendering for low opacity values so that there aren't weird
+   shading effects
+"""
+
+
 from __future__ import division
 
 import numpy as np
