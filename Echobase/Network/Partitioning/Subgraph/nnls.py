@@ -12,7 +12,7 @@ def nnlsm_blockpivot(A, B, is_input_prod=False, init=None):
     Solves min ||AX-B||_2^2 s.t. X >= 0 element-wise.
 
     J. Kim and H. Park, Fast nonnegative matrix factorization: An active-set-like method and comparisons,
-    SIAM Journal on Scientific Computing, 
+    SIAM Journal on Scientific Computing,
     vol. 33, no. 6, pp. 3261-3281, 2011.
 
     Parameters
@@ -52,7 +52,7 @@ def nnlsm_blockpivot(A, B, is_input_prod=False, init=None):
     (n, k) = AtB.shape
     MAX_ITER = n * 5
 
-    if init != None:
+    if init is not None:
         PassSet = init > 0
         X, num_cholesky, num_eq = normal_eq_comb(AtA, AtB, PassSet)
         Y = AtA.dot(X) - AtB
@@ -287,7 +287,7 @@ def normal_eq_comb(AtA, AtB, PassSet=None):
     num_eq = 0
     if AtB.size == 0:
         Z = np.zeros([])
-    elif (PassSet == None) or np.all(PassSet):
+    elif (PassSet is None) or np.all(PassSet):
         Z = nla.solve(AtA, AtB)
         num_cholesky = 1
         num_eq = AtB.shape[1]
