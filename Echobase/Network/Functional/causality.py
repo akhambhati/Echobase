@@ -57,15 +57,15 @@ def Granger(data, lagPar, signif_value, n_perm=1000):
     # Get data attributes
     n_samp, n_chan = data.shape
 
-    adj=np.zeros((n_chan, n_chan))
-    adj_filter=np.zeros((n_chan, n_chan))
+    adj = np.zeros((n_chan, n_chan))
+    adj_filter = np.zeros((n_chan, n_chan))
     for ii in range(0, n_chan):
         for jj in range(0, n_chan):
             if ii == jj:
                 continue
 
-            signal1 = data[ii, :]
-            signal2 = data[jj, :]
+            signal1 = data[:, ii]
+            signal2 = data[:, jj]
             signal = np.vstack([signal1, signal2]).T
             model = VAR(signal);
             results = model.fit(lagPar);
