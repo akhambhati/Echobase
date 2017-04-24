@@ -73,8 +73,8 @@ def Granger(data, lagPar, signif_value, n_perm=1000):
 
             granger_test_scrambled2 = np.zeros(n_perm)
             for perm_i in range(0, n_perm):
-                permsignal1 = AAFTsur(signal1)
-                permsignal2 = AAFTsur(signal2)
+                permsignal1 = ts_surr.AAFTsur(signal1)
+                permsignal2 = ts_surr.AAFTsur(signal2)
 
                 signal=np.vstack([permsignal1, permsignal2]).T
                 model = VAR(signal);
