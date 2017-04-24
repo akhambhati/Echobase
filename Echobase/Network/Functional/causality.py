@@ -69,7 +69,8 @@ def Granger(data, lagPar, signif_value, n_perm=1000):
             signal = np.vstack([signal1, signal2]).T
             model = VAR(signal);
             results = model.fit(lagPar);
-            granger_test = results.test_causality('y1', ['y2'], kind='f');
+            granger_test = results.test_causality('y1', ['y2'], kind='f',
+                                                  verbose=False);
 
             granger_test_scrambled2 = np.zeros(n_perm)
             for perm_i in range(0, n_perm):
