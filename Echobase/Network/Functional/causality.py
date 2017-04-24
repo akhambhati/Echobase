@@ -79,7 +79,8 @@ def Granger(data, lagPar, signif_value, n_perm=1000):
                 signal=np.vstack([permsignal1, permsignal2]).T
                 model = VAR(signal);
                 results = model.fit(lagPar);
-                granger_test_scrambled = results.test_causality('y1', ['y2'], kind='f');
+                granger_test_scrambled = results.test_causality('y1', ['y2'], kind='f',
+                                                                verbose=False);
                 granger_test_scrambled2[perm_i] = granger_test_scrambled['statistic'];
 
             #compute pvalue from real granger test and surrogate model
