@@ -13,7 +13,7 @@ import numpy as np
 from statsmodels.tsa.api import VAR
 
 from ...Common import errors
-from ...Sigproc import AAFTsur
+from ...Sigproc import ts_surr
 
 
 def Granger(data, lagPar, signif_value, n_perm=1000):
