@@ -43,7 +43,7 @@ def node_strength(adj):
     return deg_vec
 
 
-def node_control(adj):
+def node_control(adj, base_sync=None):
     """
     Function for computing control centrality of a node (change in synchronizability)
 
@@ -51,6 +51,9 @@ def node_control(adj):
     ----------
         adj: ndarray, shape (N, N)
             Undirected, symmetric adjacency matrix with N nodes
+
+        base_sync: float
+            Base synchronizability of adj, precomputed to save time
 
     Returns
     -------
@@ -68,7 +71,8 @@ def node_control(adj):
     n_node = adj.shape[0]
 
     # Get the original synchronizability
-    base_sync = synchronizability(adj)
+    if base_sync is None:
+        base_sync = synchronizability(adj)
 
     control_vec = np.zeros(n_node)
     for i in xrange(n_node):

@@ -7,6 +7,7 @@ Reference: Roberts et al. (2016) NeuroImage 124:379-393.
 Change Log
 ----------
 2017/01/30 - Implemented surrogate_trend, surrogate_bin
+2017/05/15 - Implemented adj_perm
 """
 
 from __future__ import division
@@ -155,3 +156,37 @@ def bin_perm(adj, dist, n_bins):
     adj_wgt = configuration.convert_conn_vec_to_adj_matr(rnd_cfg_vec)
 
     return adj_wgt
+
+
+def adj_perm(adj):
+    """
+    Randomly permutes adjacency matrix.
+
+    Parameters
+    ----------
+        adj: ndarray, shape (N, N)
+            Undirected, symmetric adjacency matrix with N nodes
+
+    Returns
+    -------
+        adj_perm: ndarray, shape (N, N)
+            Undirected, symmetric permuted adjacency matrix with N nodes
+    """
+
+    # Standard param checks
+    errors.check_type(adj, np.ndarray)
+    errors.check_dims(adj, 2)
+    if not (adj == adj.T).all():
+        raise Exception('Adjacency matrix is not undirected and symmetric.')
+
+    # Preliminaries
+    n_node = adj.shape[0]
+    adj_perm = np.zeros((n_node, n_node))
+
+    # Permute the adjacency matrix
+    adj = np.reshape(adj,[1,n_node,n_node])
+    cfg_matr = configuration.convert_adj_matr_to_cfg_matr(adj)
+    perm_cfg_matr = np.random.permutation(cfg_matr.squeeze())
+    adj_perm = configuration.convert_conn_vec_to_adj_matr(perm_cfg_matr.squeeze())
+
+    return adj_perm
