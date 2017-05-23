@@ -151,4 +151,7 @@ def draw(surf_vertices, surf_triangles, surf_scalars, surf_cmap, surf_opacity,
     surf_surf.module_manager.scalar_lut_manager.lut.table = lut
     surf_surf.actor.property.backface_culling = True
 
-    return my_engine, conn_source
+    if conn_list is not None:
+        return my_engine, conn_source
+    else:
+        return my_engine
