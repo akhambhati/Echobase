@@ -19,8 +19,6 @@ TODO: GlassBrain Project
 """
 
 
-from __future__ import division
-
 import numpy as np
 from mayavi import mlab
 import nibabel as nib
