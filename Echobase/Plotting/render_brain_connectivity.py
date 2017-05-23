@@ -25,7 +25,7 @@ import nibabel as nib
 
 
 def draw(surf_vertices, surf_triangles, surf_scalars, surf_cmap, surf_opacity,
-          node_coords, node_sizes, node_colors,
+          node_coords=None, node_sizes=None, node_colors=None,
           conn_list=None, conn_pct=None, conn_cmap=None):
     """
     Draws a brain graph superimposed on the brain surface
@@ -72,22 +72,23 @@ def draw(surf_vertices, surf_triangles, surf_scalars, surf_cmap, surf_opacity,
     my_engine = mlab.get_engine()
     fig = mlab.figure(size=(1000, 1000), bgcolor=(1.0, 1.0, 1.0), engine=my_engine)
 
-    ### Plot the nodes on the brain
-    n_node = node_coords.shape[0]
-    for n_i in xrange(n_node):
+    if node_coords is not None:
+        ### Plot the nodes on the brain
+        n_node = node_coords.shape[0]
+        for n_i in xrange(n_node):
 
-        node_source = mlab.pipeline.scalar_scatter(node_coords[n_i, 0],
-                                                   node_coords[n_i, 1],
-                                                   node_coords[n_i, 2],
-                                                   figure=fig)
+            node_source = mlab.pipeline.scalar_scatter(node_coords[n_i, 0],
+                                                       node_coords[n_i, 1],
+                                                       node_coords[n_i, 2],
+                                                       figure=fig)
 
-        node_surface = mlab.pipeline.glyph(node_source,
-                                           scale_mode='none',
-                                           scale_factor=node_sizes[n_i],
-                                           mode='sphere',
-                                           color=tuple(node_colors[n_i][:3]),
-                                           opacity=node_colors[n_i][3],
-                                           figure=fig)
+            node_surface = mlab.pipeline.glyph(node_source,
+                                               scale_mode='none',
+                                               scale_factor=node_sizes[n_i],
+                                               mode='sphere',
+                                               color=tuple(node_colors[n_i][:3]),
+                                               opacity=node_colors[n_i][3],
+                                               figure=fig)
 
     if conn_list is not None:
         ### Plot the connections on the brain
