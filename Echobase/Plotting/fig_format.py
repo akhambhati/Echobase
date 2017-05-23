@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-
 def update_rcparams(rcParams):
     params = {
               ## Fonts
@@ -12,8 +11,8 @@ def update_rcparams(rcParams):
              'font.weight': 'medium',
              'font.stretch': 'normal',
              'font.size': 6.0,
-             'font.serif': ['Times', 'Palatino', 'New Century Schoolbook', 'Bookman', 'Computer Modern Roman'],
-             'font.sans-serif': ['Arial', 'Helvetica', 'Avant Garde', 'Computer Modern Sans serif'],
+             'font.serif': ['Times'],
+             'font.sans-serif': ['Helvetica'],
              'font.cursive': ['Zapf Chancery', 'Sand', 'cursive'],
              'font.fantasy': ['Comic Sans MS', 'Chicago', 'Charcoal', 'Impact', 'Western', 'fantasy'],
              'font.monospace': ['Source Code Pro', 'Courier', 'Computer Modern Typewriter'],
@@ -74,8 +73,8 @@ def update_rcparams(rcParams):
               'grid.linewidth': 0.5,
 
               ## Figure
-              'figure.figsize': [3, 2],
-              'figure.dpi': 150,
+              'figure.figsize': [3, 3],
+              'figure.dpi': 300,
               'figure.facecolor': 'white',
               'figure.autolayout': True,
               'figure.max_open_warning': 40,
@@ -86,6 +85,12 @@ def update_rcparams(rcParams):
               'savefig.bbox': 'tight',
               'savefig.pad_inches': 0.1,
               'savefig.jpeg_quality': 95,
+              'savefig.transparent': True,
+
+              ## Text Rendering
+              'pdf.fonttype': 42,
+              'ps.fonttype': 42,
+              'svg.fonttype': 'none',
 
               ## Verbose
               'verbose.level': 'helpful',
