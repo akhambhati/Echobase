@@ -59,7 +59,7 @@ def curve_test(Y, cnd_1, cnd_2, n_perm=1000):
 
         rnd_Y_1 = np.mean(Y[:, rnd_cnd_1], axis=1)
         rnd_Y_2 = np.mean(Y[:, rnd_cnd_2], axis=1)
-        zrnd_area = _curve_area(rnd_Y_1, rnd_Y_2)
+        rnd_area = _curve_area(rnd_Y_1, rnd_Y_2)
 
         if rnd_area > true_area:
             p_count += 1
