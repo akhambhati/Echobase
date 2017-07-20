@@ -16,7 +16,7 @@ from ..Sigproc import reref, prewhiten, filters
 from ..Network.Functional import correlation, coherence
 
 
-def broadband_conn(data, fs):
+def broadband_conn(data, fs, reref=True):
     """
     Pipeline function for computing a broadband functional network from ECoG.
 
@@ -33,6 +33,9 @@ def broadband_conn(data, fs):
 
         fs: int
             Sampling frequency
+
+        reref: True/False
+            Re-reference data to the common average (default: True)
 
     Returns
     -------
@@ -62,7 +65,10 @@ def broadband_conn(data, fs):
     param['XCorr'] = {'tau': 0.25}
 
     # Build pipeline
-    data_hat = reref.common_avg_ref(data)
+    if reref:
+        data_hat = reref.common_avg_ref(data)
+    else:
+        data_hat = data.copy()
     data_hat = prewhiten.ar_one(data_hat)
     data_hat = filters.elliptic(data_hat, fs, **param['Notch_60Hz'])
     data_hat = filters.elliptic(data_hat, fs, **param['HPF_5Hz'])
@@ -72,7 +78,7 @@ def broadband_conn(data, fs):
     return adj
 
 
-def multiband_conn(data, fs):
+def multiband_conn(data, fs, reref=True):
     """
     Pipeline function for computing a band-specific functional network from ECoG.
 
@@ -89,6 +95,9 @@ def multiband_conn(data, fs):
 
         fs: int
             Sampling frequency
+
+        reref: True/False
+            Re-reference data to the common average (default: True)
 
     Returns
     -------
@@ -120,7 +129,10 @@ def multiband_conn(data, fs):
     param['HighGamma_Band'] = [95., 105.]
 
     # Build pipeline
-    data_hat = reref.common_avg_ref(data)
+    if reref:
+        data_hat = reref.common_avg_ref(data)
+    else:
+        data_hat = data.copy()
     adj_alphatheta = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['AlphaTheta_Band'])
     adj_beta = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['Beta_Band'])
     adj_lowgamma = coherence.multitaper(data_hat, fs, param['time_band'], param['n_taper'], param['LowGamma_Band'])
