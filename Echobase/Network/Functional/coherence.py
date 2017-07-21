@@ -66,21 +66,24 @@ def multitaper(data, fs, time_band, n_taper, cf):
 
     # Compute all coherences
     for n1, n2 in zip(triu_ix, triu_iy):
-        out = mt_coherence(1.0/fs,
-                           data[:, n1],
-                           data[:, n2],
-                           time_band,
-                           n_taper,
-                           int(n_samp/2.), 0.95,
-                           iadapt=1,
-                           cohe=True, freq=True)
+        try:
+            out = mt_coherence(1.0/fs,
+                               data[:, n1],
+                               data[:, n2],
+                               time_band,
+                               n_taper,
+                               int(n_samp/2.), 0.95,
+                               iadapt=1,
+                               cohe=True, freq=True)
 
-        # Find closest frequency to the desired center frequency
-        cf_idx = np.flatnonzero((out['freq'] >= cf[0]) &
-                                (out['freq'] <= cf[1]))
+            # Find closest frequency to the desired center frequency
+            cf_idx = np.flatnonzero((out['freq'] >= cf[0]) &
+                                    (out['freq'] <= cf[1]))
 
-        # Store coherence in association matrix
-        adj[n1, n2] = np.mean(out['cohe'][cf_idx])
+            # Store coherence in association matrix
+            adj[n1, n2] = np.mean(out['cohe'][cf_idx])
+        except Exception as ee:
+            adj[n1, n2] = np.nan
     adj += adj.T
 
     return adj
