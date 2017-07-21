@@ -66,7 +66,9 @@ def multitaper(data, fs, time_band, n_taper, cf):
 
     # Compute all coherences
     for n1, n2 in zip(triu_ix, triu_iy):
-        try:
+        if np.mean(data[:, n1]-data[:, n2]) < np.finfo(float).eps:
+            adj[n1, n2] = np.nan
+        else:
             out = mt_coherence(1.0/fs,
                                data[:, n1],
                                data[:, n2],
@@ -82,8 +84,6 @@ def multitaper(data, fs, time_band, n_taper, cf):
 
             # Store coherence in association matrix
             adj[n1, n2] = np.mean(out['cohe'][cf_idx])
-        except Exception as ee:
-            adj[n1, n2] = np.nan
     adj += adj.T
 
     return adj
