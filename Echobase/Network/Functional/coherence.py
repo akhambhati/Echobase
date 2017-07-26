@@ -48,7 +48,6 @@ def multitaper(data, fs, time_band, n_taper, cf):
     # Standard param checks
     errors.check_type(data, np.ndarray)
     errors.check_dims(data, 2)
-    errors.check_type(fs, int)
     errors.check_type(time_band, float)
     errors.check_type(n_taper, int)
     errors.check_type(cf, list)
