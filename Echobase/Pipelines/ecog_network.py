@@ -16,7 +16,7 @@ from ..Sigproc import reref, prewhiten, filters
 from ..Network.Functional import correlation, coherence
 
 
-def broadband_conn(data, fs, reref=True):
+def broadband_conn(data, fs, avgref=True):
     """
     Pipeline function for computing a broadband functional network from ECoG.
 
@@ -65,7 +65,7 @@ def broadband_conn(data, fs, reref=True):
     param['XCorr'] = {'tau': 0.25}
 
     # Build pipeline
-    if reref:
+    if avgref:
         data_hat = reref.common_avg_ref(data)
     else:
         data_hat = data.copy()
@@ -78,7 +78,7 @@ def broadband_conn(data, fs, reref=True):
     return adj
 
 
-def multiband_conn(data, fs, reref=True):
+def multiband_conn(data, fs, avgref=True):
     """
     Pipeline function for computing a band-specific functional network from ECoG.
 
@@ -129,7 +129,7 @@ def multiband_conn(data, fs, reref=True):
     param['HighGamma_Band'] = [95., 105.]
 
     # Build pipeline
-    if reref:
+    if avgref:
         data_hat = reref.common_avg_ref(data)
     else:
         data_hat = data.copy()
