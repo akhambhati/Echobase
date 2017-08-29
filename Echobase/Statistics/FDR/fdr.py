@@ -41,7 +41,7 @@ def bhp(pv_list, alpha=0.05, dependent=False):
 
     sig_ix = []
     for ii, ix in enumerate(pv_ix):
-        if pv_list[ix] <= (alpha * (ii+1) / (fac[ii] * np.float(n_comp)):
+        if pv_list[ix] <= (alpha * (ii+1) / (fac[ii] * np.float(n_comp))):
             sig_ix.append(ix)
     thresh_ix = np.max(sig_ix)
 
