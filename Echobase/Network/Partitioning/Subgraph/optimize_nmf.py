@@ -192,7 +192,7 @@ def run_xval_paramset(cfg_matr, param_dict):
     return qmeas_dict
 
 
-def find_optimum_xval_paramset(param_list, qmeas_list):
+def find_optimum_xval_paramset(param_list, qmeas_list, search_pct=25):
     """
     Integrate the parameter set and the quality measures to identify
     optimal parameter set based on minimum cross-validation error
@@ -237,9 +237,9 @@ def find_optimum_xval_paramset(param_list, qmeas_list):
 
     # Find optimum parameter set
     opt_param_dict = {}
-    opt_param_dict['rank'] = int(optimization_dict['rank'][optimization_dict['error'] < np.percentile(optimization_dict['error'], 25)].mean().round())
-    opt_param_dict['alpha'] = optimization_dict['alpha'][optimization_dict['error'] < np.percentile(optimization_dict['error'], 25)].mean()
-    opt_param_dict['beta'] = optimization_dict['beta'][optimization_dict['error'] < np.percentile(optimization_dict['error'], 25)].mean()
+    opt_param_dict['rank'] = int(optimization_dict['rank'][optimization_dict['error'] < np.percentile(optimization_dict['error'], search_pct)].mean().round())
+    opt_param_dict['alpha'] = optimization_dict['alpha'][optimization_dict['error'] < np.percentile(optimization_dict['error'], search_pct)].mean()
+    opt_param_dict['beta'] = optimization_dict['beta'][optimization_dict['error'] < np.percentile(optimization_dict['error'], search_pct)].mean()
 
     print('Optimal Rank: {}'.format(opt_param_dict['rank']))
     print('Optimal Alpha: {}'.format(opt_param_dict['alpha']))
