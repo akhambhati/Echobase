@@ -207,6 +207,9 @@ def find_optimum_xval_paramset(param_list, qmeas_list, search_pct=25):
                                              pct_sparse_subnet, pct_sparse_coef}
             List of dicts aggregated over param_list runs of run_xval_paramset
 
+        search_pct: float (0.0, 100.0)
+            Percentile for optimum parameter search space.
+
     Return
     ------
         optimization_dict: dict with each quality measure and associated parameters
