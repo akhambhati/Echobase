@@ -168,6 +168,6 @@ def snmf_bcd(cfg_matr, alpha, beta,
                    verbose)
     display.my_display('\nDone.\n', verbose)
 
-    W, H, weights = matr_util.normalize_column_pair(W, H)
+    H, W, weights = matr_util.normalize_column_pair(H, W)
 
     return W.T, H.T, rel_error
