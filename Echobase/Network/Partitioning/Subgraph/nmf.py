@@ -33,7 +33,7 @@ from ....Common import errors, display
 
 
 def snmf_bcd(cfg_matr, alpha, beta,
-             fac_subnet_init, fac_coef_init,j
+             fac_subnet_init, fac_coef_init,
              max_iter, sparse_dim='obs', verbose=True):
     """
     Compute Sparse-NMF based on Kim and Park (2011).
