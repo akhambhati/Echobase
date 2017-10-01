@@ -33,8 +33,8 @@ from ....Common import errors, display
 
 
 def snmf_bcd(cfg_matr, alpha, beta,
-             fac_subnet_init, fac_coef_init,
-             max_iter, verbose=True):
+             fac_subnet_init, fac_coef_init,j
+             max_iter, sparse_dim='obs', verbose=True):
     """
     Compute Sparse-NMF based on Kim and Park (2011).
     By default, enforces a sparse penalty on the coefficients matrix H
@@ -63,6 +63,10 @@ def snmf_bcd(cfg_matr, alpha, beta,
         fac_coef_init: numpy.ndarray
             Initial coefficients matrix
             shape: [n_fac x n_win]
+
+        sparse_dim: str
+            Choice of 'obs' to apply sparsity to sub-network expression coefficients
+            Choice of 'conn' to apply sparsity to sub-network edge coefficients
 
         max_iter: int
             Maximum number of optimization iterations to perform
@@ -168,6 +172,10 @@ def snmf_bcd(cfg_matr, alpha, beta,
                    verbose)
     display.my_display('\nDone.\n', verbose)
 
-    W, H, weights = matr_util.normalize_column_pair(W, H, by_norm='1')
+    if sparse_dim == 'obs':
+        W, H, weights = matr_util.normalize_column_pair(W, H, by_norm='1')
+
+    if sparse_dim == 'conn':
+        H, W, weights = matr_util.normalize_column_pair(H, W, by_norm='1')
 
     return W.T, H.T, rel_error
