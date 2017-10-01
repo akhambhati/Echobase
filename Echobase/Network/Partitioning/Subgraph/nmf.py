@@ -34,7 +34,7 @@ from ....Common import errors, display
 
 def snmf_bcd(cfg_matr, alpha, beta,
              fac_subnet_init, fac_coef_init,
-             max_iter, sparse_dim='obs', verbose=True):
+             max_iter, sparse_dim='conn', verbose=True):
     """
     Compute Sparse-NMF based on Kim and Park (2011).
     By default, enforces a sparse penalty on the coefficients matrix H
@@ -65,7 +65,7 @@ def snmf_bcd(cfg_matr, alpha, beta,
             shape: [n_fac x n_win]
 
         sparse_dim: str
-            Choice of 'obs' to apply sparsity to sub-network expression coefficients
+            Choice of 'win' to apply sparsity to sub-network expression coefficients
             Choice of 'conn' to apply sparsity to sub-network edge coefficients
 
         max_iter: int
@@ -98,6 +98,10 @@ def snmf_bcd(cfg_matr, alpha, beta,
     errors.check_type(fac_coef_init, np.ndarray)
     errors.check_type(max_iter, int)
     errors.check_type(verbose, bool)
+    errors.check_type(sparse_dim, str)
+
+    if not sparse_dim in ['win', 'conn']:
+        raise ValueError('%r is not set to win or conn' % sparse_dim)
 
     # Check input dimensions
     if not len(cfg_matr.shape) == 2:
@@ -125,19 +129,31 @@ def snmf_bcd(cfg_matr, alpha, beta,
     # A - [n_conn x n_win]
     # W - [n_conn x n_fac]
     # H - [n_win x n_fac]
-    A = cfg_matr.T.copy()
-    W = fac_subnet_init.T.copy()
-    H = fac_coef_init.T.copy()
+    if sparse_dim == 'win':
+        A = cfg_matr.T.copy()
+        W = fac_subnet_init.T.copy()
+        H = fac_coef_init.T.copy()
+
+    # A - [n_win x n_conn]
+    # W - [n_win x n_fac]
+    # H - [n_conn x n_fac]
+    if sparse_dim == 'conn':
+        A = cfg_matr.copy()
+        W = fac_coef_init.T.copy()
+        H = fac_subnet_init.T.copy()
+
+    alpha_dim = W.shape[0]
+    beta_dim = H.shape[0]
 
     # Regularization matrix
     # alpha_matr - [n_fac x n_fac]
     alpha_matr = np.sqrt(alpha) * np.eye(n_fac)
-    alpha_zeros_matr = np.zeros((n_conn, n_fac))
+    alpha_zeros_matr = np.zeros((alpha_dim, n_fac))
 
     # Sparsity matrix
     # beta_matr - [1 x n_fac]
     beta_matr = np.sqrt(beta) * np.ones((1, n_fac))
-    beta_zeros_matr = np.zeros((1, n_win))
+    beta_zeros_matr = np.zeros((1, beta_dim))
 
     # Capture error minimization
     rel_error = np.zeros(max_iter)
@@ -172,10 +188,14 @@ def snmf_bcd(cfg_matr, alpha, beta,
                    verbose)
     display.my_display('\nDone.\n', verbose)
 
-    if sparse_dim == 'obs':
-        W, H, weights = matr_util.normalize_column_pair(W, H, by_norm='1')
+    if sparse_dim == 'win':
+        fac_subnet = W.copy()
+        fac_coef = H.copy()
 
-    if sparse_dim == 'conn':
-        H, W, weights = matr_util.normalize_column_pair(H, W, by_norm='1')
+    if sparse_dim =='conn':
+        fac_subnet = H.copy()
+        fac_coef = W.copy()
 
-    return W.T, H.T, rel_error
+    fac_subnet, fac_coef, weights = matr_util.normalize_column_pair(fac_subnet, fac_coef, by_norm='1')
+
+    return fac_subnet.T, fac_coef.T, rel_error
