@@ -14,7 +14,7 @@ import numpy as np
 from ..Common import errors
 
 
-def AAFTsur(xV):
+def AAFTsur(xV, rand_phase=None):
     """
     Amplitude Adjusted Fourier Transform Surrogates
 
@@ -37,6 +37,9 @@ def AAFTsur(xV):
     ----------
         xV: ndarray, shape (N,)
             A univariate time-series with N samples
+
+        rand_phase: ndarray, shape (N//2 - 1,)
+            Sequence of randomized phase offsets
 
     Returns
     -------
@@ -64,7 +67,10 @@ def AAFTsur(xV):
     tmpV = np.fft.fft(yV, 2*n2)
     magnV = np.abs(tmpV)
     fiV = np.angle(tmpV)
-    rfiV = np.random.rand(n2-1) * 2 * np.pi
+    if rand_phase is None:
+        rfiV = np.random.rand(n2-1) * 2 * np.pi
+    else:
+        rfiV = rand_phase * 2 * np.pi
     nfiV = np.append([0], rfiV)
     nfiV = np.append(nfiV, fiV[n2+1])
     nfiV = np.append(nfiV, -rfiV[::-1])
