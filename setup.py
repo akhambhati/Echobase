@@ -22,7 +22,8 @@ AUTHOR = "Ankit N. Khambhati"
 AUTHOR_EMAIL = "akhambhati@gmail.com"
 DOWNLOAD_URL = 'http://github.com/akhambhati/echobase/'
 LICENSE = 'GNU General Public License (GPL)'
-INSTALL_REQUIRES = ['numpy', 'scipy', 'mtspec', 'mayavi', 'vtk', 'ipython']
+INSTALL_REQUIRES = ['numpy', 'scipy', 'mtspec', 'statsmodels',
+                    'mayavi', 'vtk', 'ipython']
 
 setup(
     name=NAME,
