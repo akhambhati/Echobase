@@ -1,0 +1,5 @@
+numpy
+scipy
+mtspec
+mayavi
+ipython
