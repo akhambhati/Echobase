@@ -1,1 +1,1 @@
-import geometry
+from . import geometry

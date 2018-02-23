@@ -52,13 +52,13 @@ def par_watch_stdout(ar, dt=1.0, truncate=1000):
     while not ar.ready():
         clear_output()
         # Clear_output does not work in plain console
-        print line_break
-        print '%.3fs elapsed' % ar.elapsed
-        print line_break
-        print ''
+        print(line_break)
+        print('%.3fs elapsed' % ar.elapsed)
+        print(line_break)
+        print('')
         for eid, stdout in zip(range(len(ar)), ar.stdout):
             if stdout:
-                print '\n\n%s\n[ ipengine %2i  ]\n%s' % (
-                    line_break, eid, stdout[-truncate:])
+                print('\n\n%s\n[ ipengine %2i  ]\n%s' % (
+                    line_break, eid, stdout[-truncate:]))
         sys.stdout.flush()
         time.sleep(dt)

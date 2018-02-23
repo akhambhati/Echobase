@@ -1,3 +1,3 @@
-import FDA
-import Optimization
-import FDR
+from . import FDA
+from . import Optimization
+from . import FDR

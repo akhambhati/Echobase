@@ -1,3 +1,3 @@
-import globaltopo
-import nodetopo
-import edgetopo
+from . import globaltopo
+from . import nodetopo
+from . import edgetopo

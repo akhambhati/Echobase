@@ -1,3 +1,3 @@
-import correlation
-import coherence
-import causality
+from . import correlation
+from . import coherence
+from . import causality

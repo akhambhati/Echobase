@@ -1,6 +1,7 @@
-import Common
-import Network
-import Plotting
-import Pipelines
-import Sigproc
-import Statistics
+from . import Common
+from . import Network
+from . import Plotting
+from . import Pipelines
+from . import Sigproc
+from . import Statistics
+

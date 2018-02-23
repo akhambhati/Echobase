@@ -1,2 +1,2 @@
-import errors
-import display
+from . import errors
+from . import display

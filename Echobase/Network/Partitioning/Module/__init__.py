@@ -1,2 +1,2 @@
-import community
-import modularity
+from . import community
+from . import modularity

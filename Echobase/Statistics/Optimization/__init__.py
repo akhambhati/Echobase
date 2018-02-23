@@ -1,1 +1,1 @@
-import curve
+from . import curve

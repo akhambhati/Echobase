@@ -1,2 +1,2 @@
-import configuration
-import lesion
+from . import configuration
+from . import lesion

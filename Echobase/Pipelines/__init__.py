@@ -1,2 +1,2 @@
-import ecog_network
-import ecog_powerspec
+from . import ecog_network
+from . import ecog_powerspec
